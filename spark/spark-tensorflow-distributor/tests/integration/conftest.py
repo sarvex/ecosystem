@@ -12,9 +12,7 @@ def pytest_addoption(parser):
 def restart_spark(num_workers, num_gpus_per_worker, max_num_workers):
     subprocess.run(
         [
-            'cat /dev/null | tests/integration/restart_spark.sh --num_workers {} '
-            '--num_gpus_per_worker {} '
-            '--max_num_workers {}'.format(num_workers, num_gpus_per_worker, max_num_workers)
+            f'cat /dev/null | tests/integration/restart_spark.sh --num_workers {num_workers} --num_gpus_per_worker {num_gpus_per_worker} --max_num_workers {max_num_workers}'
         ],
         shell=True,
         check=True,
@@ -26,23 +24,16 @@ def max_num_workers(request):
 
 @pytest.fixture(scope='session')
 def extra_spark_configs(request, autouse=True):
-    if hasattr(request, 'param'):
-        conf = request.param
-    else:
-        conf = {}
+    conf = request.param if hasattr(request, 'param') else {}
     with open('tests/integration/spark_conf/spark-custom.conf', 'w') as f:
-        f.writelines(
-            ['{} {}\n'.format(k, v) for k, v in conf.items()]
-        )
+        f.writelines([f'{k} {v}\n' for k, v in conf.items()])
     return conf
 
 @pytest.fixture(scope='session', autouse=True)
 def num_workers(request, max_num_workers):
     if not hasattr(request, 'param'):
         raise Exception(
-            'num_workers is a required fixture for Spark '
-            'TensorFlow Distributor tests, but test `{}` does not '
-            'use it.'.format(request.node.name)
+            f'num_workers is a required fixture for Spark TensorFlow Distributor tests, but test `{request.node.name}` does not use it.'
         )
     num_workers_value = request.param
     if num_workers_value > max_num_workers:
@@ -61,12 +52,9 @@ def num_workers(request, max_num_workers):
 def num_gpus_per_worker(request):
     if not hasattr(request, 'param'):
         raise Exception(
-            'num_gpus_per_worker is a required fixture for Spark '
-            'TensorFlow Distributor tests, but test `{}` does not '
-            'use it.'.format(request.node.name)
+            f'num_gpus_per_worker is a required fixture for Spark TensorFlow Distributor tests, but test `{request.node.name}` does not use it.'
         )
-    num_gpus_per_worker_value = request.param
-    return num_gpus_per_worker_value
+    return request.param
 
 @pytest.fixture(scope='session', autouse=True)
 def spark_session(num_workers, num_gpus_per_worker, max_num_workers, extra_spark_configs):
@@ -75,8 +63,7 @@ def spark_session(num_workers, num_gpus_per_worker, max_num_workers, extra_spark
     logging.getLogger().info('Creating spark session with the following confs.')
     with open('tests/integration/spark_conf/spark-defaults.conf') as f:
         for line in f:
-            l = line.strip()
-            if l:
+            if l := line.strip():
                 k, v = l.split(None, 1)
                 builder.config(k, v)
     session = builder.getOrCreate()

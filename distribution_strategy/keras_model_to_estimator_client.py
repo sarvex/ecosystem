@@ -62,8 +62,7 @@ def resolve_cluster(port=5000, parse_task_name_fn=_parse_task_name_fn):
   for task_type, targets in cluster_spec.items():
     for target in targets:
       if target is None:
-        raise ValueError(
-            'Not all %s tasks are found in the cluster' % task_type)
+        raise ValueError(f'Not all {task_type} tasks are found in the cluster')
   tf.logging.info('Using cluster_spec %r' % cluster_spec)
   return cluster_spec
 
@@ -85,7 +84,7 @@ def main(args):
     return
 
   model_dir = args[1]
-  print('Using %s to store checkpoints.' % model_dir)
+  print(f'Using {model_dir} to store checkpoints.')
 
   # Define a Keras Model.
   model = tf.keras.Sequential()

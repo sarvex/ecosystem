@@ -24,8 +24,7 @@ for worker_index in range(1, num_workers + 1):
     print(f'Starting worker {worker_index}')
     subprocess.run(
         [
-            'docker-compose exec -T --index={} worker '
-            'tests/integration/start_worker.sh'.format(worker_index)
+            f'docker-compose exec -T --index={worker_index} worker tests/integration/start_worker.sh'
         ],
         shell=True,
     )

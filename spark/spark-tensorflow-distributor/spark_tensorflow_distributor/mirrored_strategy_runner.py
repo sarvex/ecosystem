@@ -205,11 +205,11 @@ class MirroredStrategyRunner:
                     os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(
                         str(e)
                         for e in random.sample(gpus_owned, self._num_slots))
+                elif self._num_slots > 1:
+                    raise ValueError(
+                        'Cannot run with more than 1 CPU machine in local mode. Try setting num_slots to -1.'
+                    )
                 else:
-                    if self._num_slots > 1:
-                        raise ValueError(f'Cannot run with more than 1 CPU '
-                                         'machine in local mode. '
-                                         'Try setting num_slots to -1.')
                     os.environ['CUDA_VISIBLE_DEVICES'] = ''
                 result = MirroredStrategyRunner._run_tensorflow_program(
                     train_fn, self._use_custom_strategy, **kwargs)
@@ -227,9 +227,9 @@ class MirroredStrategyRunner:
         self._logger.info(
             'View Spark executor stderr logs to inspect training...')
         result = self.sc.parallelize(range(self._num_tasks), self._num_tasks) \
-            .barrier() \
-            .mapPartitions(spark_task_program) \
-            .collect()[0]
+                .barrier() \
+                .mapPartitions(spark_task_program) \
+                .collect()[0]
         self._logger.info(f'Training with {self._num_slots} slots is complete!')
         return result
 
@@ -252,8 +252,7 @@ class MirroredStrategyRunner:
             if 'CUDA_VISIBLE_DEVICES' in os.environ:
                 gpu_indices = list(map(int, addresses))
                 gpu_list = os.environ['CUDA_VISIBLE_DEVICES'].split(',')
-                gpu_owned = [gpu_list[i] for i in gpu_indices]
-                return gpu_owned
+                return [gpu_list[i] for i in gpu_indices]
             return addresses
         raise ValueError(
             f'The provided GPU resource name `{gpu_resource_name}` '
@@ -347,9 +346,7 @@ class MirroredStrategyRunner:
             set_tf_config(context)
             result = run_tensorflow_program(train_fn, use_custom_strategy,
                                             **kwargs)
-            if context.partitionId() == 0:
-                return [result]
-            return [None]
+            return [result] if context.partitionId() == 0 else [None]
 
         return wrapped_train_fn
 
@@ -372,9 +369,9 @@ class MirroredStrategyRunner:
             return True
         if lowercase_val == 'false':
             return False
-        raise Exception("_getConfBoolean expected a boolean conf "
-                        "value but found value of type {} "
-                        "with value: {}".format(type(val), val))
+        raise Exception(
+            f"_getConfBoolean expected a boolean conf value but found value of type {type(val)} with value: {val}"
+        )
 
     # Protects users that want to use encryption
     # against passing around unencrypted data

@@ -7,6 +7,7 @@ changed by tests.
 """
 
 
+
 import argparse
 
 
@@ -28,23 +29,19 @@ conf = {}
 with open('tests/integration/spark_conf/spark-base.conf', 'r') as f:
     lines = f.readlines()
     for i in range(len(lines)):
-        l = lines[i].strip()
-        if l:
+        if l := lines[i].strip():
             k, v = l.split(None, 1)
             conf[k] = v
 
 with open('tests/integration/spark_conf/spark-custom.conf', 'r') as f:
     lines = f.readlines()
     for i in range(len(lines)):
-        l = lines[i].strip()
-        if l:
+        if l := lines[i].strip():
             k, v = l.split(None, 1)
             conf[k] = v
 
 with open('tests/integration/spark_conf/spark-defaults.conf', 'w') as f:
-    f.writelines(
-        ['{} {}\n'.format(k, v) for k, v in conf.items()]
-    )
+    f.writelines([f'{k} {v}\n' for k, v in conf.items()])
 
 with open('tests/integration/spark_conf/gpuDiscoveryScriptStub.sh', 'w+') as f:
         original_file_content = f.read()

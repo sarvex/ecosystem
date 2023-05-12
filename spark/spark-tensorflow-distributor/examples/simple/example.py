@@ -9,8 +9,9 @@ def train():
     BATCH_SIZE = 64
 
     def make_datasets():
-        (mnist_images, mnist_labels), _ = \
-            tf.keras.datasets.mnist.load_data(path=str(uuid.uuid4())+'mnist.npz')
+        (mnist_images, mnist_labels), _ = tf.keras.datasets.mnist.load_data(
+            path=f'{str(uuid.uuid4())}mnist.npz'
+        )
 
         dataset = tf.data.Dataset.from_tensor_slices((
             tf.cast(mnist_images[..., tf.newaxis] / 255.0, tf.float32),

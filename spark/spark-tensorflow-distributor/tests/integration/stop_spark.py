@@ -16,8 +16,7 @@ num_workers = int(args.num_workers)
 for worker_index in range(1, num_workers + 1):
     subprocess.run(
         [
-            'docker-compose exec -T --index={} worker '
-            '/mnt/spark-tensorflow-distributor/tests/integration/stop_worker.sh'.format(worker_index)
+            f'docker-compose exec -T --index={worker_index} worker /mnt/spark-tensorflow-distributor/tests/integration/stop_worker.sh'
         ],
         shell=True,
     )

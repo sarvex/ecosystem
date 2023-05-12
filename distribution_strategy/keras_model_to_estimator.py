@@ -40,7 +40,7 @@ def main(args):
     return
 
   model_dir = args[1]
-  print('Using %s to store checkpoints.' % model_dir)
+  print(f'Using {model_dir} to store checkpoints.')
 
   # Define a Keras Model.
   model = tf.keras.Sequential()

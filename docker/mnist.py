@@ -141,7 +141,7 @@ def device_and_target():
   if FLAGS.job_name == "ps":
     server.join()
 
-  worker_device = "/job:worker/task:{}".format(FLAGS.task_index)
+  worker_device = f"/job:worker/task:{FLAGS.task_index}"
   # The device setter will automatically place Variables ops on separate
   # parameter servers (ps). The non-Variable ops will be placed on the workers.
   return (
